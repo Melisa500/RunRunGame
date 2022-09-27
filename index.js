@@ -1,7 +1,7 @@
 var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 400,
+    width: 1100,
+    height: 600,
     physics: {
         default: 'arcade',
         arcade: {
@@ -20,11 +20,13 @@ var game = new Phaser.Game(config);
 var player;
 var platforms;
 var cursors;
+var sentido = true ;
 
 
 function preload (){
     /* Fondo */
     this.load.image('background', 'assets/img/background.png');
+    this.load.image('ground', 'assets/img/platform.png');
     /* Personaje: Jaz */
     this.load.spritesheet('jaz', 'assets/img/jaz-idle.png',
         { frameWidth: 32, frameHeight: 48 }
@@ -54,7 +56,7 @@ function preload (){
         { frameWidth: 32, frameHeight: 48 }
     );
     this.load.spritesheet('tito-w', 'assets/img/tito-walk.png',
-            { frameWidth: 49, frameHeight: 48 }
+            { frameWidth: 28, frameHeight: 46, margin: 2, spacing: 19,}
         );
     this.load.spritesheet('tito-s', 'assets/img/tito-special.png',
             { frameWidth: 32, frameHeight: 48 }
@@ -64,9 +66,20 @@ function preload (){
 }
 
 function create (){
-    this.add.image(400, 300, 'background').setScale(0.7);
+    /* BACKGROUND - Posicion y escala*/
+    this.add.image(400, 300, 'background').setScale(0.8);
 
-    player = this.physics.add.sprite(100, 450, 'tito-w').setScale(3);
+    /* start platforms */
+    platforms = this.physics.add.staticGroup();
+
+    platforms.create(400, 640, 'ground').setScale(4).refreshBody();
+
+    platforms.create(600, 400, 'ground');
+    platforms.create(50, 250, 'ground');
+    platforms.create(750, 220, 'ground');
+    /* end platforms */
+
+    player = this.physics.add.sprite(100, 400, 'tito-w').setScale(3);
 
     player.setBounce(0.2); /* rebote */
     player.setCollideWorldBounds(true);
@@ -75,7 +88,7 @@ function create (){
         key: 'left',
         frames: this.anims.generateFrameNumbers('tito-w', { start: 0, end: 5 }),
         frameRate: 10,
-        repeat: -1
+        repeat: -1,
     });
 
     this.anims.create({
@@ -92,6 +105,8 @@ function create (){
     });
 
     cursors = this.input.keyboard.createCursorKeys();
+    this.physics.add.collider(player, platforms);
+
 
 }
 
@@ -99,9 +114,23 @@ function update (){
     if (cursors.left.isDown){
         player.setVelocityX(-200);
         player.anims.play('left', true);
+        if (sentido){
+            player.toggleFlipX()
+            sentido = !sentido
+        }
+
+
+
     }else if (cursors.right.isDown){
         player.setVelocityX(200);
         player.anims.play('right', true);
+        if (!sentido){
+            player.toggleFlipX()
+            sentido = !sentido
+        }
+
+
+
     }else {
         player.setVelocityX(0);
         player.anims.play('turn');
